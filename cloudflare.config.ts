@@ -8,6 +8,8 @@ export default defineConfig({
 		entrypoint,
 		assets: {
 			notFoundHandling: "single-page-application",
+			// Запросы к API идут в Worker, а не получают index.html.
+			runWorkerFirst: ["/api/*"],
 		},
 	},
 });

@@ -1,3 +1,5 @@
+import type { Info } from "../src/types.ts";
+
 export interface Place {
 	name: string;
 	latitude: number;
@@ -9,25 +11,7 @@ export interface SearchResult extends Place {
 	admin1?: string;
 }
 
-export interface Forecast {
-	current: {
-		temperature_2m: number;
-		apparent_temperature: number;
-		relative_humidity_2m: number;
-		wind_speed_10m: number;
-		weather_code: number;
-		is_day: number;
-	};
-	daily: {
-		time: string[];
-		weather_code: number[];
-		temperature_2m_max: number[];
-		temperature_2m_min: number[];
-		precipitation_probability_max: (number | null)[];
-	};
-}
-
-async function getJson<T>(url: URL): Promise<T> {
+async function getJson<T>(url: string): Promise<T> {
 	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error(`HTTP ${response.status}`);
@@ -36,24 +20,17 @@ async function getJson<T>(url: URL): Promise<T> {
 }
 
 export async function searchCity(name: string): Promise<SearchResult[]> {
-	const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
-	url.search = new URLSearchParams({ name, count: "5", language: "ru" }).toString();
-	const data = await getJson<{ results?: SearchResult[] }>(url);
+	const params = new URLSearchParams({ name, count: "5", language: "ru" });
+	const data = await getJson<{ results?: SearchResult[] }>(
+		`https://geocoding-api.open-meteo.com/v1/search?${params}`,
+	);
 	return data.results ?? [];
 }
 
-export function getForecast({ latitude, longitude }: Place): Promise<Forecast> {
-	const url = new URL("https://api.open-meteo.com/v1/forecast");
-	url.search = new URLSearchParams({
-		latitude: String(latitude),
-		longitude: String(longitude),
-		current:
-			"temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day",
-		daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
-		timezone: "auto",
-		forecast_days: "7",
-	}).toString();
-	return getJson<Forecast>(url);
+// Погода и курсы приходят от нашего Worker одним ответом.
+export function getInfo({ latitude, longitude }: Place): Promise<Info> {
+	const params = new URLSearchParams({ lat: String(latitude), lon: String(longitude) });
+	return getJson<Info>(`/api/info?${params}`);
 }
 
 // Коды погоды WMO, которые возвращает Open-Meteo.

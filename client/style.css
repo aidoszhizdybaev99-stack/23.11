@@ -80,11 +80,17 @@ ul {
 	text-align: left;
 }
 
-#weather {
+.card {
 	background: var(--card);
 	border-radius: 16px;
 	padding: 20px;
+	margin-bottom: 16px;
 	text-align: center;
+}
+
+.muted {
+	color: var(--muted);
+	font-size: 0.85rem;
 }
 
 h2 {

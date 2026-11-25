@@ -3,12 +3,12 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Погода</title>
+		<title>Погода и курс</title>
 		<link rel="stylesheet" href="/client/style.css" />
 	</head>
 	<body>
 		<main>
-			<h1>Погода</h1>
+			<h1>Погода и курс</h1>
 
 			<form id="search" role="search">
 				<input
@@ -26,33 +26,55 @@
 
 			<p id="status" role="status"></p>
 
-			<section id="weather" hidden>
-				<h2 id="place"></h2>
-				<div class="now">
-					<span id="icon" aria-hidden="true"></span>
-					<span id="temp"></span>
-				</div>
-				<p id="summary"></p>
-				<dl>
-					<div>
-						<dt>Ощущается</dt>
-						<dd id="feels"></dd>
+			<div id="content" hidden>
+				<section class="card">
+					<h2 id="place"></h2>
+					<div class="now">
+						<span id="icon" aria-hidden="true"></span>
+						<span id="temp"></span>
 					</div>
-					<div>
-						<dt>Влажность</dt>
-						<dd id="humidity"></dd>
-					</div>
-					<div>
-						<dt>Ветер</dt>
-						<dd id="wind"></dd>
-					</div>
-				</dl>
-				<h3>Прогноз на 7 дней</h3>
-				<ul id="days"></ul>
-			</section>
+					<p id="summary"></p>
+					<dl>
+						<div>
+							<dt>Ощущается</dt>
+							<dd id="feels"></dd>
+						</div>
+						<div>
+							<dt>Влажность</dt>
+							<dd id="humidity"></dd>
+						</div>
+						<div>
+							<dt>Ветер</dt>
+							<dd id="wind"></dd>
+						</div>
+					</dl>
+					<h3>Прогноз на 7 дней</h3>
+					<ul id="days"></ul>
+				</section>
+
+				<section class="card">
+					<h2>Курс валют</h2>
+					<dl>
+						<div>
+							<dt>Доллар</dt>
+							<dd id="usd"></dd>
+						</div>
+						<div>
+							<dt>Лира</dt>
+							<dd id="try"></dd>
+						</div>
+						<div>
+							<dt>Кросс-курс</dt>
+							<dd id="cross"></dd>
+						</div>
+					</dl>
+					<p id="rates-date" class="muted"></p>
+				</section>
+			</div>
 
 			<footer>
-				Данные: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>
+				Данные: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>,
+				<a href="https://frankfurter.dev/" target="_blank" rel="noopener">Frankfurter</a>
 			</footer>
 		</main>
 		<script type="module" src="/client/main.ts"></script>

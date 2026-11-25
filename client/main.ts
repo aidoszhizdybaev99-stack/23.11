@@ -1,4 +1,5 @@
-import { describe, getForecast, searchCity, type Forecast, type Place } from "./weather.ts";
+import type { Currency, Forecast, Rates } from "../src/types.ts";
+import { describe, getInfo, searchCity, type Place } from "./weather.ts";
 
 const DEFAULT_PLACE: Place = { name: "Алматы", latitude: 43.24, longitude: 76.89 };
 
@@ -10,10 +11,10 @@ const form = byId<HTMLFormElement>("search");
 const input = byId<HTMLInputElement>("query");
 const results = byId<HTMLUListElement>("results");
 const statusLine = byId("status");
-const weather = byId("weather");
+const content = byId("content");
 
 // Номер последнего запроса: ответы на устаревшие запросы отбрасываются.
-let latestForecast = 0;
+let latestInfo = 0;
 let latestSearch = 0;
 
 function degrees(value: number): string {
@@ -39,7 +40,21 @@ function placeFromUrl(): Place {
 	return DEFAULT_PLACE;
 }
 
-function render(place: Place, { current, daily }: Forecast): void {
+function rateText({ base, quote, rate }: Currency): string {
+	return `1 ${base} = ${rate.toLocaleString("ru-RU", { maximumFractionDigits: 2 })} ${quote}`;
+}
+
+function renderRates({ usdKzt, tryKzt, cross }: Rates): void {
+	byId("usd").textContent = rateText(usdKzt);
+	byId("try").textContent = rateText(tryKzt);
+	byId("cross").textContent =
+		`1 USD = ${cross.toLocaleString("ru-RU", { maximumFractionDigits: 4 })} TRY`;
+	byId("rates-date").textContent = `Курс на ${new Date(usdKzt.date).toLocaleDateString("ru-RU", {
+		timeZone: "UTC",
+	})}`;
+}
+
+function renderWeather(place: Place, { current, daily }: Forecast): void {
 	const now = describe(current.weather_code, current.is_day === 1);
 	byId("place").textContent = place.name;
 	byId("icon").textContent = now.icon;
@@ -77,19 +92,22 @@ function render(place: Place, { current, daily }: Forecast): void {
 }
 
 async function show(place: Place): Promise<void> {
-	const request = ++latestForecast;
+	const request = ++latestInfo;
 	statusLine.textContent = "Загружаю…";
-	weather.hidden = true;
+	content.hidden = true;
 	try {
-		const forecast = await getForecast(place);
-		if (request !== latestForecast) return;
-		render(place, forecast);
-		document.title = `Погода: ${place.name}`;
+		const { weather, rates } = await getInfo(place);
+		if (request !== latestInfo) return;
+		renderWeather(place, weather);
+		renderRates(rates);
+		document.title = `Погода и курс: ${place.name}`;
 		statusLine.textContent = "";
-		weather.hidden = false;
-	} catch {
-		if (request !== latestForecast) return;
-		statusLine.textContent = "Не удалось загрузить погоду. Попробуйте ещё раз.";
+		content.hidden = false;
+	} catch (error) {
+		if (request !== latestInfo) return;
+		console.error(error);
+		statusLine.textContent =
+			"Не удалось загрузить погоду и курс валют. Проверьте интернет и обновите страницу.";
 	}
 }
 
